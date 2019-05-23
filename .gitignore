@@ -1,0 +1,8 @@
+*.class
+*.log
+.idea
+.bigquery
+.repl
+target
+.ensime*
+.metals
