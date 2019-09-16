@@ -107,7 +107,7 @@ object MadridMeetupStreamingPipeline {
       .withSessionWindows(Duration.standardSeconds(SESSION_GAP), wopts)
 
     // Now "sum" to obtain aggregated values
-    val summed: SCollection[TaxiRide] = ???
+    val summed: SCollection[TaxiRide] = ridesByKey.reduceByKey(_ + _).map(_._2)
 
     summed
   }

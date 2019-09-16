@@ -65,7 +65,7 @@ object DataTypes {
                           ) {
     def toTaxiRide: TaxiRide =
       TaxiRide(this.ride_id,
-        0,
+        1,
         this.timestamp,
         None,
         this.meter_increment,
@@ -85,8 +85,6 @@ object DataTypes {
                        finish_status: Option[String]
                      ) {
     def +(taxiRide: TaxiRide): TaxiRide = {
-
-      // Something is missing here
 
       val (first, second) =
         if (this.init.isAfter(taxiRide.init)) {
@@ -114,7 +112,7 @@ object DataTypes {
 
       TaxiRide(
         taxiRide.ride_id,
-        0,
+        first.n_points + second.n_points,
         first.init,
         finishInstant,
         first.total_meter + second.total_meter,
