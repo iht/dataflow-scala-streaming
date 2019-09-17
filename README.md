@@ -26,9 +26,9 @@ You should have installed `gcloud` authenticated with the necessary credentials,
 should be available in the environment variable `GOOGLE_APPLICATION_CREDENTIALS`. 
 For more details see https://cloud.google.com/docs/authentication/getting-started
 
-In the Dataflow UI, you should a pipeline like this one:
+In the Dataflow UI, you should a graph of the pipeline like this one:
 
-[](./imgs/pipeline.png)
+![Graph of the pipline](./imgs/pipeline.png)
 
 The script assumes that you want to launch the pipeline in `europe-west1` and that you have the following
 resources in your project already created
