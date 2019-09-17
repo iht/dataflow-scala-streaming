@@ -14,10 +14,8 @@
 
 package dev.herraiz.meetup.dataflow
 
-import io.circe
 import com.spotify.scio._
 import com.spotify.scio.bigquery._
-import com.spotify.scio.io.PubsubIO
 import com.spotify.scio.values.{SCollection, WindowOptions}
 import dev.herraiz.meetup.dataflow.data.DataTypes._
 import org.apache.beam.sdk.transforms.windowing._
@@ -43,16 +41,15 @@ object MadridMeetupStreamingPipeline {
 
     /*_*/
     rides.saveAsTypedBigQuery(goodTable, WRITE_APPEND, CREATE_IF_NEEDED)
-    writableErrors.saveAsTypedBigQuery(badTable, WRITE_APPEND, CREATE_IF_NEEDED)
-    /*_*/
+    writableErrors.saveAsTypedBigQuery(badTable, WRITE_APPEND, CREATE_IF_NEEDED) /*_*/
+
 
     // Group by session with a max duration of 5 mins between events
     // Window options
     val wopts: WindowOptions = customWindowOptions
     val groupRides = groupRidesByKey(rides.map(_.toTaxiRide), wopts)
     /*_*/
-    groupRides.saveAsTypedBigQuery(accumTable, WRITE_APPEND, CREATE_IF_NEEDED)
-    /*_*/
+    groupRides.saveAsTypedBigQuery(accumTable, WRITE_APPEND, CREATE_IF_NEEDED) /*_*/
 
     sc.run
   }
@@ -71,44 +68,15 @@ object MadridMeetupStreamingPipeline {
     )
 
   def getMessagesFromPubSub(pubsubTopic: String)(implicit sc: ScioContext): SCollection[String] = {
-    val pubsubInput: PubsubIO[String] = PubsubIO.apply[String](
-      pubsubTopic,
-      "ride_id",
-      "timestamp")
-    val pubsubParams: PubsubIO.ReadParam = PubsubIO.ReadParam(false)
-
-    /*_*/
-    // Disable type aware highlights for this code (false positive)
-    val messages: SCollection[String] = sc.read(pubsubInput)(pubsubParams) /*_*/
-      .withName("Read from PubSub")
-
-    messages
+    ???
   }
 
   def parseJSONStrings(messages: SCollection[String]):
-    (SCollection[PointTaxiRide], SCollection[JsonError]) = {
-    val objects: SCollection[Either[circe.Error, PointTaxiRide]] = messages.map(json2TaxiRide)
-      .withName("Parse JSON")
-
-    val (errorsEither, ridesEither) = objects.partition(_.isLeft)
-    val errors: SCollection[circe.Error] = errorsEither.filter(_.isLeft).map(_.left.get)
-      .withName("Get errors")
-    val rides: SCollection[PointTaxiRide] = ridesEither.filter(_.isRight).map(_.right.get)
-      .withName("Get taxi rides")
-
-    val writableErrors: SCollection[JsonError] = errors.map(circeErrorToCustomError)
-      .withName("Prepare errors for BQ")
-
-    (rides, writableErrors)
+  (SCollection[PointTaxiRide], SCollection[JsonError]) = {
+    ???
   }
 
   def groupRidesByKey(rides: SCollection[TaxiRide], wopts: WindowOptions): SCollection[TaxiRide] = {
-    val ridesByKey: SCollection[(String, TaxiRide)] = rides.keyBy(_.ride_id)
-      .withSessionWindows(Duration.standardSeconds(SESSION_GAP), wopts)
-
-    // Now "sum" to obtain aggregated values
-    val summed: SCollection[TaxiRide] = ???
-
-    summed
+    ???
   }
 }
