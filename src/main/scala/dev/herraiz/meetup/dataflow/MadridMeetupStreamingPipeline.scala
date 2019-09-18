@@ -14,8 +14,10 @@
 
 package dev.herraiz.meetup.dataflow
 
+import io.circe
 import com.spotify.scio._
 import com.spotify.scio.bigquery._
+import com.spotify.scio.io.PubsubIO
 import com.spotify.scio.values.{SCollection, WindowOptions}
 import dev.herraiz.meetup.dataflow.data.DataTypes._
 import org.apache.beam.sdk.transforms.windowing._
@@ -37,7 +39,7 @@ object MadridMeetupStreamingPipeline {
     val accumTable = opts("accum-table")
 
     val messages: SCollection[String] = getMessagesFromPubSub(pubsubTopic)
-    val (rides, writableErrors) = parseJSONStrings(messages)
+    val (rides: SCollection[PointTaxiRide], writableErrors) = parseJSONStrings(messages)
 
     /*_*/
     rides.saveAsTypedBigQuery(goodTable, WRITE_APPEND, CREATE_IF_NEEDED)
@@ -68,15 +70,39 @@ object MadridMeetupStreamingPipeline {
     )
 
   def getMessagesFromPubSub(pubsubTopic: String)(implicit sc: ScioContext): SCollection[String] = {
-    ???
+    val pubsub =
+      PubsubIO.apply[String](pubsubTopic, "ride_id", "timestamp")
+
+    val params = PubsubIO.ReadParam.apply(false)
+
+    /*_*/
+    val messages = sc.read(pubsub)(params) /*_*/
+
+    messages
   }
 
   def parseJSONStrings(messages: SCollection[String]):
   (SCollection[PointTaxiRide], SCollection[JsonError]) = {
-    ???
+    val pointRidesEither = messages.map(json2TaxiRide)
+
+    val (errorsLeft: SCollection[Either[circe.Error, PointTaxiRide]],
+    ridesRight: SCollection[Either[circe.Error, PointTaxiRide]]) =
+      pointRidesEither.partition(_.isLeft)
+
+    val errors: SCollection[circe.Error] = errorsLeft.map(_.left.get)
+    val rides: SCollection[PointTaxiRide] = ridesRight.map(_.right.get)
+
+    val errorsWritable: SCollection[JsonError] = errors.map(circeErrorToCustomError)
+
+    (rides, errorsWritable)
   }
 
   def groupRidesByKey(rides: SCollection[TaxiRide], wopts: WindowOptions): SCollection[TaxiRide] = {
-    ???
+    val ridesByKey: SCollection[(String, TaxiRide)] = rides.keyBy(_.ride_id)
+      .withSessionWindows(Duration.standardSeconds(SESSION_GAP), wopts)
+
+    val summed: SCollection[TaxiRide] = ridesByKey.reduceByKey(_ + _).map(_._2)
+
+    summed
   }
 }
