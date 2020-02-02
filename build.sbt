@@ -1,8 +1,8 @@
 import sbt._
 import Keys._
 
-val scioVersion = "0.8.0-beta1"
-val beamVersion = "2.15.0"
+val scioVersion = "0.8.1"
+val beamVersion = "2.18.0"
 val scalaMacrosVersion = "2.1.1"
 
 // For JSON handling
@@ -12,7 +12,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "dev.herraiz",
   // Semantic versioning http://semver.org/
   version := "0.1.0-SNAPSHOT",
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.10",
   scalacOptions ++= Seq("-target:jvm-1.8",
                         "-deprecation",
                         "-feature",
