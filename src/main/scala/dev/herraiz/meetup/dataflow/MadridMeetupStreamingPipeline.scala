@@ -41,17 +41,15 @@ object MadridMeetupStreamingPipeline {
     val messages: SCollection[String] = getMessagesFromPubSub(pubsubTopic)
     val (rides: SCollection[PointTaxiRide], writableErrors) = parseJSONStrings(messages)
 
-    /*_*/
     rides.saveAsTypedBigQuery(goodTable, WRITE_APPEND, CREATE_IF_NEEDED)
-    writableErrors.saveAsTypedBigQuery(badTable, WRITE_APPEND, CREATE_IF_NEEDED) /*_*/
-
+    writableErrors.saveAsTypedBigQuery(badTable, WRITE_APPEND, CREATE_IF_NEEDED)
 
     // Group by session with a max duration of 5 mins between events
     // Window options
     val wopts: WindowOptions = customWindowOptions
     val groupRides = groupRidesByKey(rides.map(_.toTaxiRide), wopts)
-    /*_*/
-    groupRides.saveAsTypedBigQuery(accumTable, WRITE_APPEND, CREATE_IF_NEEDED) /*_*/
+
+    groupRides.saveAsTypedBigQuery(accumTable, WRITE_APPEND, CREATE_IF_NEEDED)
 
     sc.run
   }
