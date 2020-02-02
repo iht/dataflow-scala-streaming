@@ -5,9 +5,6 @@ val scioVersion = "0.8.1"
 val beamVersion = "2.18.0"
 val scalaMacrosVersion = "2.1.1"
 
-// For JSON handling
-val circeVersion = "0.11.1"
-
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization := "dev.herraiz",
   // Semantic versioning http://semver.org/
@@ -38,13 +35,11 @@ lazy val root: Project = project
     libraryDependencies ++= Seq(
       "com.spotify" %% "scio-core" % scioVersion,
       "com.spotify" %% "scio-bigquery" % scioVersion,
+      "com.spotify" %% "scio-extra" % scioVersion,
       "com.spotify" %% "scio-test" % scioVersion % Test,
       "org.apache.beam" % "beam-runners-direct-java" % beamVersion,
       "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % beamVersion,
-      "org.slf4j" % "slf4j-simple" % "1.7.28",
-      "io.circe" %% "circe-core" % circeVersion,
-      "io.circe" %% "circe-generic" % circeVersion,
-      "io.circe" %% "circe-parser" % circeVersion
+      "org.slf4j" % "slf4j-simple" % "1.7.28"
     )
   )
   .enablePlugins(PackPlugin)
